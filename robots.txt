@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pnc-hub-install.vercel.app/sitemap.xml
