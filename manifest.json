@@ -4,12 +4,13 @@
   "short_name": "PNC Hub",
   "description": "PNC Student and Teacher Portal for the 2026\u20132027 academic year.",
   "lang": "en",
-  "start_url": "./index.html",
+  "start_url": "./index.html#dash",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "orientation": "any",
-  "background_color": "#071b4b",
-  "theme_color": "#071b4b",
+  "background_color": "#f2f6fa",
+  "theme_color": "#10344a",
   "icons": [
     {
       "src": "assets/images/icon-192.png",

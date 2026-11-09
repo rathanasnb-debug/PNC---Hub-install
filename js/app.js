@@ -26,6 +26,8 @@ let user=S.get('user',null),editId=null,Q='';
 const NAV=[['dash','🏠','Dashboard'],['clubs','🎯','Student Clubs'],['schedule','🗓️','Study Schedule'],['rentals','🏘️','Rental Houses'],['rooms','🚪','Meeting Rooms'],['info','ℹ️','PNC Information'],['events','📣','Announcements & Events'],['profile','👤','My Profile']];
 const isStaff=()=>user&&user.role!=='student',isAdmin=()=>user&&user.role==='admin';
 const data=(k,d)=>S.get(k,d);
+const routeFromHash=()=>{const r=(location.hash||'#dash').slice(1);return NAV.some(n=>n[0]===r)?r:'dash'};
+let currentRoute=routeFromHash(),routeTrail=[],skipRouteHistory=false;
 
 /* ===== Auth ===== */
 function loginView(){return `<div class="login"><form class="card f" style="display:grid" onsubmit="doLogin(event)">
@@ -40,21 +42,22 @@ function logout(){S.set('user',null);user=null;render()}
 /* ===== Shell & routing ===== */
 function render(){
  const root=$('#root');if(!user){root.innerHTML=loginView();return}
- const r=(location.hash||'#dash').slice(1),route=NAV.find(n=>n[0]==r)?r:'dash',n=S.get('notes',[]);
+ const route=routeFromHash(),n=S.get('notes',[]);
  root.innerHTML=`<div class="app"><aside class="side" id="side"><div class="logo"><i>PN</i><div>PNC Hub<br><small class="mute">STUDENT & TEACHER · 2026–2027</small></div></div>
  ${NAV.map(x=>`<a class="nav ${x[0]==route?'on':''}" href="#${x[0]}" onclick="$('#side').classList.remove('open')">${x[1]} ${x[2]}</a>`).join('')}
  <button class="nav" onclick="toggleTheme()">🌓 Settings: Theme</button><button class="nav" onclick="logout()">🚪 Logout</button></aside>
  <div class="main"><div class="top"><button class="ib burger" onclick="$('#side').classList.toggle('open')">☰</button>
  <input aria-label="Search clubs" placeholder="⌕  Search clubs…" onkeydown="if(event.key=='Enter'){Q=this.value;location.hash='clubs';render()}">
  <button class="ib" onclick="$('#nm').hidden=!$('#nm').hidden">🔔${n.length?`<span class="badge">${n.length}</span>`:''}</button>
- <a class="ib" href="#profile" style="display:grid;place-items:center;text-decoration:none">👤</a></div>
+ <a class="ib profile-link" href="#profile" aria-label="Open profile"><img src="assets/images/profile-photo.jpg" alt=""></a></div>
  <div class="menu" id="nm" hidden>${n.length?n.map(t=>`<div>${esc(t)}</div>`).join('')+'<button class="btn g s" onclick="S.set(\'notes\',[]);render()">Clear</button>':'<div class="mute">No notifications</div>'}</div>
  <div class="content" id="view"></div></div></div>`;
- $('#view').innerHTML=V[route]();if(A[route])A[route]();
+ $('#view').innerHTML=(route==='dash'?'':'<button class="btn g page-back" onclick="goBack()" aria-label="Go back to previous page">← Back</button>')+V[route]();if(A[route])A[route]();
 }
+function goBack(){const route=routeTrail.pop()||'dash';if(route===currentRoute)return;skipRouteHistory=true;location.hash=route}
 function toggleTheme(){const d=document.documentElement,dark=d.getAttribute('data-theme')==='dark';const next=dark?'light':'dark';d.setAttribute('data-theme',next);S.set('theme',next)}
 const savedTheme=S.get('theme',null);if(savedTheme)document.documentElement.setAttribute('data-theme',savedTheme);
-window.addEventListener('hashchange',render);
+window.addEventListener('hashchange',()=>{const next=routeFromHash();if(skipRouteHistory)skipRouteHistory=false;else if(next!==currentRoute)routeTrail.push(currentRoute);currentRoute=next;render()});
 
 /* ===== Views ===== */
 const V={},A={};
@@ -168,7 +171,7 @@ function addEv(e){e.preventDefault();if($('#ek').value=='a'){const a=data('ann',
 function delAn(i){S.set('ann',data('ann',AN0).filter(a=>a.id!=i));render()}
 function delEv(i){S.set('events',data('events',EV0).filter(a=>a.id!=i));render()}
 
-V.profile=()=>`<h2>My Profile</h2><div class="g2"><form class="card f" onsubmit="saveProf(event)"><div class="ico" style="width:70px;height:70px;font-size:34px">👤</div><label>Full name<input id="pn" value="${esc(user.name)}" required></label><label>ID<input value="${esc(user.id)}" disabled></label><label>Email<input id="pe" type="email" value="${esc(user.email)}" required></label><label>Phone<input id="pp" value="${esc(user.phone)}"></label><label>Role<input value="${user.role}" disabled></label><label>Academic year<input value="2026–2027 · ${esc(user.year)}" disabled></label><button class="btn">Save profile</button></form>
+V.profile=()=>`<h2>My Profile</h2><div class="g2"><form class="card f" onsubmit="saveProf(event)"><div class="profile-heading"><img class="profile-photo" src="assets/images/profile-photo.jpg" alt="Profile photo of ${esc(user.name)}"><div><h3>${esc(user.name)}</h3><span class="tag">${esc(user.role)}</span></div></div><label>Full name<input id="pn" value="${esc(user.name)}" required></label><label>ID<input value="${esc(user.id)}" disabled></label><label>Email<input id="pe" type="email" value="${esc(user.email)}" required></label><label>Phone<input id="pp" value="${esc(user.phone)}"></label><label>Role<input value="${user.role}" disabled></label><label>Academic year<input value="2026–2027 · ${esc(user.year)}" disabled></label><button class="btn">Save profile</button></form>
 <form class="card f" onsubmit="event.preventDefault();toast('Password updated (demo only)');this.reset()"><h3>Change password</h3><label>Current<input type="password" required></label><label>New<input type="password" minlength="6" required></label><button class="btn">Update</button><button type="button" class="btn g" onclick="toggleTheme()">Toggle dark/light</button><button type="button" class="btn g" onclick="if(confirm('Reset all demo data?')){['tasks','joins','rent','bookings','events','ann','notes'].forEach(k=>{delete mem[k];try{localStorage.removeItem(k)}catch(e){}});render()}">Reset demo data</button><button type="button" class="btn r" onclick="logout()">Logout</button></form></div>`;
 function saveProf(e){e.preventDefault();Object.assign(user,{name:$('#pn').value,email:$('#pe').value,phone:$('#pp').value});S.set('user',user);toast('Profile saved');render()}
 render();

@@ -1,4 +1,4 @@
-const CACHE_NAME = "pnc-hub-pwa-v1";
+const CACHE_NAME = "pnc-hub-pwa-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,7 +8,8 @@ const APP_SHELL = [
   "./js/pwa.js",
   "./assets/images/icon-192.png",
   "./assets/images/icon-512.png",
-  "./assets/images/icon-maskable-512.png"
+  "./assets/images/icon-maskable-512.png",
+  "./assets/images/profile-photo.jpg"
 ];
 
 self.addEventListener("install", event => {

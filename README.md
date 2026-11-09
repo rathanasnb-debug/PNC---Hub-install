@@ -52,14 +52,15 @@ This project includes a Progressive Web App (PWA) manifest, app icons, a service
 
 ### Android
 1. Open the website in Chrome.
-2. Tap **Install PNC Hub** if the button appears, or open Chrome's menu and choose **Install app** / **Add to Home screen**.
-3. Confirm installation.
+2. Tap **Install PNC Hub** and confirm the browser's install prompt. If no prompt opens, use Chrome's menu and choose **Install app** / **Add to Home screen**.
+3. After installation, tap the **PNC Hub** icon on your phone's home screen to open the app in its standalone view.
 
 ### iPhone
 1. Open the website in **Safari**.
 2. Tap **Share**.
 3. Choose **Add to Home Screen**.
 4. Tap **Add**.
+5. Tap the **PNC Hub** icon on your home screen to open the app. iPhone requires these confirmation steps; a website cannot install itself automatically.
 
 ### Test on your computer
 Use VS Code Live Server or another localhost server. Service workers do not work reliably when opening the HTML file directly using `file://`.
